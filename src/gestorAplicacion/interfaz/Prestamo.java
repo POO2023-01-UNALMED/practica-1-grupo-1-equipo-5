@@ -1,9 +1,10 @@
 package gestorAplicacion.interfaz;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 
-public class Prestamo implements Abonable{
+public class Prestamo implements Abonable, Serializable {
     static double tasa = 0.18;
     private double montoPrestado;
     private double totalPagado;

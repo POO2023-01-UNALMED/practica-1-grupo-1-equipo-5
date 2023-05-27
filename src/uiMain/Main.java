@@ -718,3 +718,290 @@ public class Main {
                     }
                 }
             }
+            case 4 -> {
+                return;
+            }
+        }
+        System.out.println("");
+        System.out.println("");
+        System.out.println("MODIFICACION REALIZADA CON EXITO");
+        System.out.println("");
+    }
+    //Menú para modificar nombre o nuevo objetivo de una meta
+    static void modificar(Usuario usuario, Meta meta) {
+        int opcion;
+        boolean[] bol;
+        System.out.println("");
+        System.out.println("¿Que desea modificar?");
+        System.out.println("1. Nombre");
+        System.out.println("2. Nuevo objetivo");
+        System.out.println("3. Volver al inicio");
+        System.out.println("");
+        opcion = validarEntradaInt(3, true, 1, true);
+
+        switch (opcion) {
+            case 1:
+                System.out.println("");
+                System.out.println("Nuevo nombre:");
+                String nombre = Verificacion.validarEntradaTexto(true);
+                meta.setNombre(nombre);
+                break;
+            case 2:
+                System.out.println("");
+                System.out.println("Nuevo Objetivo");
+                bol = meta.setObjetivo(Verificacion.validarEntradaDouble(Double.MAX_VALUE, true, 0, false));
+                if(!bol[0]) {
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("Esta Meta ya esta cumplida por lo que no es posible cambiar el objetivo");
+                    System.out.println("");
+                    return;
+                }
+                if (bol[1]) {
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("FELICIDADES HAS CUMPLIDO TU META " + meta.getNombre().toUpperCase());
+                    System.out.println("");
+                    System.out.println("Escoge un Bolsillo al cual enviar el dinero para que lo puedas usar (" + String.format("%.2f",meta.getSaldo())+"): ");
+                    Listador.listarBolsillos(usuario);
+                    int option = Verificacion.validarEntradaInt(usuario.getAhorros().size(), true, 1, true) - 1;
+                    Ahorro bolsillo = usuario.getAhorros().get(option);
+                    System.out.println("");
+                    System.out.println("Nuevo saldo en el bolsillo de: " + String.format("%.2f",bolsillo.getSaldo()) + " " );
+                    System.out.println("");
+
+                }else{
+                    System.out.println("");
+                    System.out.println("Restante para cumplir la meta de: " +String.format("%.2f",meta.getObjetivo()-meta.getSaldo()));
+                }
+                break;
+            case 4:
+                return;
+        }
+        System.out.println("");
+        System.out.println("");
+        System.out.println("MODIFICACION REALIZADA CON EXITO");
+        System.out.println("");
+        System.out.println("");
+    }
+
+    //OPCIÓN 8
+    //Menú para que el usuario seleccione que prestamo desea
+    static void solicitarPrestamo(Usuario usuario) {
+        System.out.println("");
+        System.out.println("---- Criterios para validar el credito ----");
+        System.out.println("");
+        System.out.println("¿Cuántos hijos tiene?: ");
+        int hijos = validarEntradaInt(25, true, 0, true);
+
+        System.out.println("");
+        System.out.println("¿Cuántos Años tiene usted?");
+        int edad = validarEntradaInt(120, true, 18, true);
+
+        System.out.println("");
+        System.out.println("Digite su ingreso mensual utilice ',' para el simbolo decimal: ");
+        double ingresoMensual = validarEntradaDouble(Double.MAX_VALUE, true, 0, false);
+
+        System.out.println("");
+        System.out.println("¿Desea dar alguna garantia para reducir la tasa de interes?");
+        System.out.println("1. Si");
+        System.out.println("2. No");
+        int opcGarantia = -1, opc;
+        opc = validarEntradaInt(2, true, 1, true);
+        if (opc == 1) {
+            System.out.println("");
+            System.out.println("Escoja el Elemento que dejara Como garantia");
+            listarGarantias();
+            opcGarantia = validarEntradaInt(Garantia.values().length, true, 1, true) - 1;
+        }
+
+        // Primera interaccion
+        double posibleCantidadPrestamo = Estadistica.calcularPosibleCantidadPrestamo(usuario, ingresoMensual, edad, hijos, opcGarantia);
+
+        if (posibleCantidadPrestamo >0){
+            System.out.println("");
+            System.out.println("¿Cuanto dinero gasta en vivienda? (utilice ',' para el simbolo decimal): ");
+            double gastoVivienda = validarEntradaDouble(Double.MAX_VALUE, true, 0, false);
+
+            double[] infoCuotas = Prestamo.calcularCuotas(posibleCantidadPrestamo, ingresoMensual, gastoVivienda);
+            if (infoCuotas[0] == 0) {
+                System.out.println("");
+                System.out.println("");
+                System.out.println("Lo sentimos no eres apto para el prestamo");
+                System.out.println("PRESTAMO RECHAZADO/CANCELADO");
+                System.out.println("");
+                return;
+            }
+
+            System.out.println("");
+            System.out.println("Se generaria un prestamo de un total de " + String.format("%.2f",posibleCantidadPrestamo));
+            System.out.println("a " + infoCuotas[0] + " periodos(meses)");
+            System.out.println("con una cuota de " + infoCuotas[1]);
+            System.out.println("");
+            System.out.println("Aceptas estos terminos?");
+            System.out.println("1 Si");
+            System.out.println("2 No");
+            System.out.println("");
+            int opt = validarEntradaInt(2, true, 1, true);
+            switch (opt) {
+                case 1:
+                    AceptadoPrestamo(usuario, posibleCantidadPrestamo, (int) infoCuotas[0], opcGarantia);
+                    break;
+                case 2:
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("PRESTAMO CANCELADO");
+                    System.out.println("");
+                    break;
+            }
+        }
+        else{
+            System.out.println("");
+            System.out.println("");
+            System.out.println("Lo sentimos no eres apto para el prestamo");
+            System.out.println("PRESTAMO RECHAZADO/CANCELADO");
+            System.out.println("");
+            return;
+        }
+
+    }
+
+    //Si el usuario es apto para un prestado a largo plazo se le solicitan unos datos para guardar como garantía, se genera el préstamo y se agrega a los préstamos realizados por el usuario
+    static void AceptadoPrestamo(Usuario usuario, double dineroSolicitado, int periodos, int opcGarantia) {
+        String[] referencia = new String[2];
+
+        System.out.println("");
+        System.out.println("Escriba el nombre de una referencia: ");
+        referencia[0] = validarEntradaTexto(true);
+
+        System.out.println("");
+        System.out.println("Escriba el numero telefonico de la referencia: ");
+        referencia[1] = validarEntradaTexto(true);
+
+        System.out.println("");
+        System.out.println("Escoja el bolsillo al que se le enviará el dinero");
+        listarBolsillos(usuario);
+
+        int bolsilloSeleccionado = validarEntradaInt(Categoria.values().length, true, 1, true) - 1;
+
+        List<Categoria> list = new ArrayList<>();
+        for (Categoria bolsillos : Categoria.values()) {
+            list.add(bolsillos);
+        }
+
+        Categoria bolsillo = list.get(bolsilloSeleccionado);
+        Prestamo prestamo;
+        if (opcGarantia < 0) {
+            prestamo = new Prestamo(usuario, dineroSolicitado, periodos, referencia);
+        } else {
+            prestamo = new Prestamo(usuario, dineroSolicitado, periodos, referencia, Garantia.values()[opcGarantia]);
+        }
+        usuario.nuevoPrestamo(prestamo, bolsillo);
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("PRESTAMO APROBADO...");
+        System.out.println("");
+
+    }
+
+    //OPCION 9
+    private static void abonarPrestamoOMeta(Usuario usuario) {
+        System.out.println("");
+        System.out.println("¿A que desea abonar?");
+        System.out.println("1. Prestamos");
+        System.out.println("2. Metas");
+        System.out.println("3. Volver al inicio");
+        System.out.println("");
+        int option = validarEntradaInt(3, true, 1, true);
+        Abonable abonable;
+        boolean bol;
+        switch (option) {
+            case 1:
+                System.out.println("");
+                System.out.println("Seleccione un prestamo");
+                bol = listarPrestamos(usuario);
+                if (!bol) {
+                    return;
+                }
+                abonable = usuario.getPrestamos().get(validarEntradaInt(usuario.getPrestamos().size(), true, 1, true) - 1);
+                break;
+            case 2:
+                System.out.println("");
+                System.out.println("Seleccione una meta");
+                bol = Listador.listarMetas(usuario);
+                if (!bol) {
+                    return;
+                }
+                abonable = usuario.getMetas().get(Verificacion.validarEntradaInt(usuario.getMetas().size(), true, 1, true) - 1);
+                break;
+            default:
+                return;
+        }
+
+
+        List<Categoria> list = new ArrayList<>();
+        for (Categoria bolsillos : Categoria.values()) {
+            list.add(bolsillos);
+        }
+
+        System.out.println("");
+        System.out.println("Seleccione el Bolsillo desde el que va a abonar");
+        listarBolsillos(usuario);
+        Categoria bolsillo = list.get(Verificacion.validarEntradaInt(8, true, 1, true) - 1);
+        if (bolsillo.getSaldo() > 0) {
+            System.out.println("");
+            System.out.println("Ingrese la cantidad que va a abonar (entre 0 y " + String.format("%.2f", bolsillo.getSaldo()) + "):");
+            double monto = Verificacion.validarEntradaDouble(bolsillo.getSaldo(), true, 0, false);
+            Object resp = abonable.abonar(monto, bolsillo);
+            boolean bol2;
+
+            if (resp != null) {
+                if (abonable instanceof Meta meta && resp instanceof Transaccion movimiento) {
+                    System.out.println("");
+                    System.out.println("");
+                    System.out.println("Nuevo Saldo en la meta de: " + String.format("%.2f", meta.getSaldo()));
+                    System.out.println("Nuevo saldo en la cuenta origen de: " + String.format("%.2f", bolsillo.getSaldo()));
+                    bol2 = meta.metaCumplida();
+                    if (bol2) {
+                        System.out.println("");
+                        System.out.println("");
+                        System.out.println("FELICIDADES, HAS CUMPLIDO TU META: " + meta.getNombre().toUpperCase());
+                        System.out.println("Escoge un Bolsillo al cual enviar el dinero para que lo puedas usar (" + String.format("%.2f", meta.getSaldo()) + "): ");
+                        listarBolsillos(usuario);
+                        int opt = Verificacion.validarEntradaInt(8, true, 1, true) - 1;
+                        Categoria bolsilloDes = list.get(opt);
+                        meta.terminar(bolsilloDes);
+                        System.out.println("");
+                        System.out.println("Nuevo saldo en el bolsillo de: " + String.format("%.2f", bolsilloDes.getSaldo()));
+                    } else {
+                        System.out.println("");
+                        System.out.println("Restante para cumplir la meta de: " + String.format("%.2f", meta.getObjetivo() - meta.getSaldo()));
+                    }
+                } else if (abonable instanceof Prestamo prestamo && resp instanceof double[] dou) {
+                    if (prestamo.isPagado()) {
+                        System.out.println("");
+                        System.out.println("");
+                        System.out.println("FELICIDADES PAGASTE TU PRESTAMO");
+                        System.out.println("");
+                        System.out.println("");
+                    } else {
+                        System.out.println("");
+                        System.out.println("Te queda por pagar: " + String.format("%.2f", (prestamo.getMontoPrestado() - prestamo.getTotalPagado())));
+                        System.out.println("");
+                    }
+                }
+            } else {
+                System.out.println("");
+                System.out.println("");
+                System.out.println("Abono Fallido");
+            }
+
+        } else {
+            System.out.println("");
+            System.out.println("");
+            System.out.println("La cuenta no existe o no contiene dinero");
+        }
+
+    }
+}
