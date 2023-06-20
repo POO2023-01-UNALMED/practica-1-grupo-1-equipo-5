@@ -1,3 +1,9 @@
+
+# Ana Guarín
+# Isabela Hernandez
+# Julián Álvarez
+# Cristian Imbacuan
+
 from enum import Enum
 
 class Garantia(Enum):
