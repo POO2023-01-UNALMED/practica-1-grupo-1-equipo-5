@@ -2,17 +2,26 @@ from tkinter import *
 import pathlib
 import os
 import tkinter
-from gestorAplicacion.interfaz.Ahorro import Ahorro
 from ventanas.fieldFrame import FieldFrame
 from tkinter import ttk
-from gestorAplicacion.interfaz.Categoria import Categoria
+
 from excepciones.errorAplicacion import ErrorAplicacion
 from excepciones.excepcionExistente import ExcepcionExistente
 from excepciones.excepcionLongitud import ExcepcionLongitud
 from excepciones.excepcionNumerica import ExcepcionNumerica
 from excepciones.excepcionVacio import ExcepcionVacio
+from excepciones.excepcionNoMetas import ExcepcionNoMeta
+from excepciones.excepcionNoAhorros import ExcepcionNoAhorros
 from baseDatos.serializador import Serializador
 from ventanas.popUp import PopUp
+import ventanaInicio
+
+from gestorAplicacion.interfaz.Usuario import Usuario
+from gestorAplicacion.interfaz.Meta import Meta
+from gestorAplicacion.interfaz.Categoria import Categoria
+from gestorAplicacion.interfaz.Ahorro import Ahorro
+
+
 
 class VentanaUsuario(Tk):
 
@@ -21,6 +30,7 @@ class VentanaUsuario(Tk):
     def __init__(self, usuario):
         super().__init__()
         self._usuario = usuario
+
         # Parámetros de la ventana de usuario
 
         self.title('Finanzas Personales')
@@ -150,12 +160,13 @@ class VentanaUsuario(Tk):
             ventanaDevs = Tk()
             ventanaDevs.geometry("640x360")
             ventanaDevs.resizable(False,False)
-            ventanaDevs.title("Sistemas Gestor de Dinero - Acerca de")
+            ventanaDevs.title("Finanzas Personales - Acerca de")
 
             textoInfo = f"Desarrolladores:\n" \
                         f"• Julián Álvarez\n" \
                         f"• Isabela Hernández\n" \
                         f"• Ana María Guarín\n" \
+                        f"• Cristian Imbacuan\n" \
 
             devs = Label(ventanaDevs, text = textoInfo, justify = "left", font=("Verdana", 12))
             devs.pack(fill=tkinter.Y, expand=True)
@@ -165,43 +176,46 @@ class VentanaUsuario(Tk):
             serializar = Serializador(self._usuario)
             serializar.serializar()
             self.destroy()
+            ventanaInicio.VentanaInicio(self._usuario)
             
 
         #Pantalla de inicio
-
         framePantallaInicio = Frame(self)
-        nombrePantallaInicio = Label(framePantallaInicio, text="Bienvenide", font=("Verdana", 16), fg="#8EAC50")
+        nombrePantallaInicio = Label(framePantallaInicio, text="Bienvenidee", font=("Verdana", 16), fg="#8EAC50")
         outputPantallaInicio = Text(framePantallaInicio, height=100, font=("Verdana",10))
 
-        nombrePantallaInicio.pack
-        outputPantallaInicio.pack(fill=X, expand=True, padx=(10,10))
+        nombrePantallaInicio.pack()
+        outputPantallaInicio.pack(fill=X, expand=True, padx=(10, 10))
 
         VentanaUsuario.framesEnPantalla.append(framePantallaInicio)
         cambiarVista(framePantallaInicio)
 
         #Boton para ver el saldo disponible en Bolsillos
         def botonVerBolsillos():
-
             try:
-                verificarVacio(FFVerBolsillos)
-                nombre = FFVerBolsillos.getValue("Nombre del bolsillo")
-                disponible = FFVerBolsillos.getValue("Saldo")
-                presupuesto= FFVerBolsillos.getValue("Presupuesto")
                 
-   
-                verificarNumero(disponible)
-                verificarNumero(presupuesto)
-                verificarLongitud(nombre, 3, "Nombre del bolsillo")
+                # Obtener los bolsillos del usuario
+                categorias = [(nombre, categoria.value[0], categoria.value[1]) for nombre, categoria in Categoria.__members__.items()]
+                categorias.pop()
                 
-
+                # Actualizar los valores en el FieldFrame
+                FFVerBolsillos.setValue("Viajes", f"Saldo {categorias[0][1]}\tPresupuesto {categorias[0][2]}")
+                FFVerBolsillos.setValue("Salud", f"Saldo {categorias[1][1]}\tPresupuesto {categorias[1][2]}")
+                FFVerBolsillos.setValue("Alimentacion", f"Saldo {categorias[2][1]}\tPresupuesto {categorias[2][2]}")
+                FFVerBolsillos.setValue("Transporte", f"Saldo {categorias[3][1]}\tPresupuesto {categorias[3][2]}")
+                FFVerBolsillos.setValue("Educacion", f"Saldo {categorias[4][1]}\tPresupuesto {categorias[4][2]}")
+                FFVerBolsillos.setValue("Hogar", f"Saldo {categorias[5][1]}\tPresupuesto {categorias[5][2]}")
+                FFVerBolsillos.setValue("Entretenimiento", f"Saldo {categorias[6][1]}\tPresupuesto {categorias[6][2]}")
+                FFVerBolsillos.setValue("Imprevistos", f"Saldo {categorias[7][1]}\tPresupuesto {categorias[7][2]}")
+                
             except ErrorAplicacion as e:
                 PopUp(str(e))
-
-        #Hacer get para obtener el nombre del usuario como sus bolsillo, casillas que no sean editables, solo para observar
+        
+        #Se crea el frame
         frameVerBolsillos = Frame(self)
         nombreVerBolsillos = Label(frameVerBolsillos, text="Saldo en Bolsillos", font=("Arial Rounded MT Bold", 18), fg = "#8EAC50")
         descVerBolsillos = Label(frameVerBolsillos, text="Su saldo disponible en su bolsillo es de:", font=("Arial Rounded MT Bold", 14))
-        FFVerBolsillos = FieldFrame(frameVerBolsillos, None, ["Nombre del bolsillo", "Saldo","Presupuesto"], None, None, None)
+        FFVerBolsillos = FieldFrame(frameVerBolsillos,None, ["Viajes", "Salud", "Alimentacion", "Transporte", "Educacion", "Hogar", "Entretenimiento", "Imprevistos"], None,None)
         FFVerBolsillos.crearBotones(botonVerBolsillos)
 
         outputVerBolsillos = Text(frameVerBolsillos, height=100, font=("Arial Rounded MT Bold", 10))
@@ -212,18 +226,3 @@ class VentanaUsuario(Tk):
         FFVerBolsillos.pack()
 
         VentanaUsuario.framesEnPantalla.append(frameVerBolsillos)
-
-        #Boton para ver el saldo disponible en Ahorros
-        def botonVerAhorros():
-
-            try:
-                verificarVacio(FFVerAhorros)
-                nombre = FFVerAhorros.getValue("Nombre del ahorro")
-                disponible = FFVerAhorros.getValue("Disponible")
-                fechaRetiro = FFVerAhorros.getValue("Fecha de retiro")
-   
-                verificarNumero(disponible)
-                verificarLongitud(nombre, 3, "Nombre del bolsillo")
-
-            except ErrorAplicacion as e:
-                PopUp(str(e))
