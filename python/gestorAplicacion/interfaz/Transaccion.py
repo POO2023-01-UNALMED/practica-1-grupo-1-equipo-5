@@ -1,3 +1,9 @@
+
+# Ana Guarín
+# Isabela Hernandez
+# Julián Álvarez
+# Cristian Imbacuan
+
 class Transaccion:
 
     def __init__(self, monto, fechaCreacion):

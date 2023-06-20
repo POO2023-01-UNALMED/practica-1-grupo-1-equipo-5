@@ -1,3 +1,9 @@
+
+# Ana Guarín
+# Isabela Hernandez
+# Julián Álvarez
+# Cristian Imbacuan
+
 import datetime
 import math
 
